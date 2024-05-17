@@ -1,3 +1,6 @@
 streamlit
-cohere
-python-dotenv
+diffusers
+invisible_watermark
+transformers
+accelerate
+safetensors

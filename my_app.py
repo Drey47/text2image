@@ -1,33 +1,23 @@
 import streamlit as st
-import cohere
-from dotenv import load_dotenv
-import os
+from diffusers import DiffusionPipeline
+import torch
 
-load_dotenv()
-co = cohere.Client(os.getenv('COHERE_API_KEY')) 
+def load_model():
+    st.write("Loading...")
+    pass
 
-message = []
+st.title('Géneration d\'images à partir d\'un prompt')
+st.button('chager le model', on_click = load_model)
 
-def generate_answer(input):
-    if len(input) == 0:
-        return None
-    response = co.generate(
-    model = 'command',
-    prompt= 'Show only the translation of the giving french phrase into english \n--\nPost: {}'.format(input),
-    max_tokens=20,
-    temperature=0.5,
-    k=0,
-    p=1,
-    frequency_penalty=0, 
-    presence_penalty=0, 
-    stop_sequences=["--"], 
-    return_likelihoods='NONE'
-    )
-    st.write(response.generations[0].text)
-    
-input = "Bienvenus dans le monde"
+pipe = DiffusionPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16, use_safetensors=True, variant="fp16")
+pipe.to("cuda")
 
-st.title('Traduction AI en Anglais')
 
-user_question = st.text_area('Entrer la phrase: ', height=100)
-st.button('Générer', on_click = generate_answer(user_question))
+# if using torch < 2.0
+# pipe.enable_xformers_memory_efficient_attention()
+
+user_prompt = st.text_area('Entrer votre prompt: ', height=100)
+
+images = pipe(prompt=user_prompt).images[0]
+st.image(images)
+
